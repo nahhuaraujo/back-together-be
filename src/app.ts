@@ -1,8 +1,8 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import { authRoutes } from './routes';
 import { errorHandler } from './middlewares';
+import { authRoutes } from './routes';
 
 dotenv.config();
 
@@ -13,7 +13,6 @@ app.use(
     origin: process.env.CORS_ORIGIN,
   })
 );
-
 app.use(express.json());
 
 app.get('/test', (_, res) => {
