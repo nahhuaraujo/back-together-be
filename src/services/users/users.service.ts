@@ -6,6 +6,7 @@ export const findOneUser = async (email = '') => {
     url: 'https://data.mongodb-api.com/app/data-cyjnd/endpoint/data/v1/action/findOne',
     method: 'post',
     headers: {
+      'Content-Type': 'application/json',
       'api-key': process.env.MONGO_DATA_API_KEY,
     },
     data: {
@@ -27,6 +28,7 @@ export const insertOneUser = async (user: IUser) => {
     url: 'https://data.mongodb-api.com/app/data-cyjnd/endpoint/data/v1/action/insertOne',
     method: 'post',
     headers: {
+      'Content-Type': 'application/json',
       'api-key': process.env.MONGO_DATA_API_KEY,
     },
     data: {
