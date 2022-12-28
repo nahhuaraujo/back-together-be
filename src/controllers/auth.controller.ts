@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { MongoClient } from 'mongodb';
 import { ErrorMessages, IUser, SuccessMessages, ValidationErrors } from '../models';
+import { findOneUser, insertOneUser } from '../services';
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password }: IUser = req.body;
@@ -18,16 +18,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     });
   }
 
-  const mongoURL = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@backtogether.ofcs22e.mongodb.net/?retryWrites=true&w=majority`;
-  const client = new MongoClient(mongoURL);
-
   try {
-    await client.connect();
-    const db = client.db('BackTogether');
-    const users = db.collection('Users');
-
-    const foundUser = await users.findOne({ email });
-
+    const foundUser = await findOneUser(email);
     if (!foundUser) return next(new Error(ErrorMessages.EMAIL_NOT_FOUND));
 
     const isPassOk = bcrypt.compareSync(password as string, foundUser.password as string);
@@ -44,8 +36,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   } catch (e) {
     console.log((e as Error).message);
     return next(e);
-  } finally {
-    await client.close();
   }
 };
 
@@ -68,23 +58,17 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     });
   }
 
-  const mongoURL = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@backtogether.ofcs22e.mongodb.net/?retryWrites=true&w=majority`;
-  const client = new MongoClient(mongoURL);
-
   try {
-    await client.connect();
-    const db = client.db('BackTogether');
-    const users = db.collection('Users');
-    const user = await users.findOne({ email });
+    const foundUser = await findOneUser(email);
 
-    if (user) {
+    if (foundUser) {
       return res.json({
         message: ErrorMessages.EMAIL_EXISTS_ALREADY,
       });
     }
 
     const encryptedPassword = bcrypt.hashSync(password as string, 10);
-    await users.insertOne({ email, password: encryptedPassword, phone });
+    await insertOneUser({ email, password: encryptedPassword, phone });
 
     res.statusCode = 201;
     return res.json({
@@ -93,7 +77,5 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
   } catch (e) {
     console.log((e as Error).message);
     return next(e);
-  } finally {
-    await client.close();
   }
 };
