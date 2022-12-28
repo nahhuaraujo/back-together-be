@@ -20,13 +20,13 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
   const mongoURL = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@backtogether.ofcs22e.mongodb.net/?retryWrites=true&w=majority`;
   const client = new MongoClient(mongoURL);
-  await client.connect();
-  const db = client.db('BackTogether');
-  const users = db.collection('Users');
 
   try {
+    await client.connect();
+    const db = client.db('BackTogether');
+    const users = db.collection('Users');
+
     const foundUser = await users.findOne({ email });
-    client.close();
 
     if (!foundUser) return next(new Error(ErrorMessages.EMAIL_NOT_FOUND));
 
@@ -44,6 +44,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   } catch (e) {
     console.log((e as Error).message);
     return next(e);
+  } finally {
+    await client.close();
   }
 };
 
@@ -68,12 +70,13 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
   const mongoURL = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@backtogether.ofcs22e.mongodb.net/?retryWrites=true&w=majority`;
   const client = new MongoClient(mongoURL);
-  await client.connect();
-  const db = client.db('BackTogether');
-  const users = db.collection('Users');
 
   try {
+    await client.connect();
+    const db = client.db('BackTogether');
+    const users = db.collection('Users');
     const user = await users.findOne({ email });
+
     if (user) {
       return res.json({
         message: ErrorMessages.EMAIL_EXISTS_ALREADY,
@@ -83,8 +86,6 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     const encryptedPassword = bcrypt.hashSync(password as string, 10);
     await users.insertOne({ email, password: encryptedPassword, phone });
 
-    client.close();
-
     res.statusCode = 201;
     return res.json({
       message: SuccessMessages.REGISTERED_SUCCESSFULLY,
@@ -92,5 +93,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
   } catch (e) {
     console.log((e as Error).message);
     return next(e);
+  } finally {
+    await client.close();
   }
 };
