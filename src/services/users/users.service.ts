@@ -1,10 +1,10 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { IUser } from '../../models';
 
 export const findOneUser = async (email = '') => {
-  const config = {
-    method: 'post',
+  const config: AxiosRequestConfig = {
     url: 'https://data.mongodb-api.com/app/data-cyjnd/endpoint/data/v1/action/findOne',
+    method: 'post',
     headers: {
       'api-key': process.env.MONGO_DATA_API_KEY,
     },
@@ -23,9 +23,9 @@ export const findOneUser = async (email = '') => {
 };
 
 export const insertOneUser = async (user: IUser) => {
-  const config = {
-    method: 'post',
+  const config: AxiosRequestConfig = {
     url: 'https://data.mongodb-api.com/app/data-cyjnd/endpoint/data/v1/action/insertOne',
+    method: 'post',
     headers: {
       'api-key': process.env.MONGO_DATA_API_KEY,
     },
