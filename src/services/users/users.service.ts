@@ -1,4 +1,4 @@
-import axios from 'axios';
+const axios = require('axios');
 import { IUser } from '../../models';
 
 export const findOneUser = async (email = '') => {
