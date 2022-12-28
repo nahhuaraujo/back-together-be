@@ -19,7 +19,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   }
 
   try {
-    const foundUser = await findOneUser(email);
+    const foundUser: IUser = await findOneUser(email);
     if (!foundUser) return next(new Error(ErrorMessages.EMAIL_NOT_FOUND));
 
     const isPassOk = bcrypt.compareSync(password as string, foundUser.password as string);
