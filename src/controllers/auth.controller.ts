@@ -1,31 +1,39 @@
 import bcrypt from 'bcrypt';
 import { NextFunction, Request, Response } from 'express';
+import { validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
-import { ErrorMessages, IUser, SuccessMessages, ValidationErrors } from '../models';
-import { findOneUser, insertOneUser } from '../services';
+import { ErrorMessages, SuccessMessages } from '../enums';
+import { IUser } from '../models';
+import { userService } from '../services';
 
-export const login = async (req: Request, res: Response, next: NextFunction) => {
+const login = async (req: Request, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorMsgs: string[] = [];
+    errors.array().forEach(error => {
+      errorMsgs.push(error.msg);
+    });
+    return res.status(422).json({
+      status: 'error',
+      payload: errorMsgs,
+    });
+  }
+
   const { email, password }: IUser = req.body;
-
-  if (!email) {
-    return res.json({
-      message: ValidationErrors.EMAIL_IS_REQUIRED,
-    });
-  }
-  if (!password) {
-    return res.json({
-      message: ValidationErrors.PASSWORD_IS_REQUIRED,
-    });
-  }
-
   try {
-    const foundUser: IUser = await findOneUser(email);
-    if (!foundUser) return next(new Error(ErrorMessages.EMAIL_NOT_FOUND));
+    const foundUser = await userService.findOneUserByEmail(email);
+    if (!foundUser)
+      return res.status(404).json({
+        status: 'error',
+        payload: ErrorMessages.EMAIL_NOT_FOUND,
+      });
 
     const isPassOk = bcrypt.compareSync(password as string, foundUser.password as string);
-    if (!isPassOk) {
-      return next(new Error(ErrorMessages.EMAIL_NOT_REGISTERED));
-    }
+    if (!isPassOk)
+      return res.status(404).json({
+        status: 'error',
+        payload: ErrorMessages.EMAIL_NOT_REGISTERED,
+      });
 
     delete foundUser.password;
 
@@ -34,48 +42,43 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       token: jwt.sign(foundUser, process.env.TOKEN_SECRET as string, { expiresIn: '10m' }),
     });
   } catch (e) {
-    console.log((e as Error).message);
     return next(e);
   }
 };
 
-export const register = async (req: Request, res: Response, next: NextFunction) => {
+const register = async (req: Request, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorMsgs: string[] = [];
+    errors.array().forEach(error => {
+      errorMsgs.push(error.msg);
+    });
+    return res.status(422).json({
+      status: 'error',
+      payload: errorMsgs,
+    });
+  }
+
   const { email, password, phone }: IUser = req.body;
-
-  if (!email) {
-    return res.json({
-      message: ValidationErrors.EMAIL_IS_REQUIRED,
-    });
-  }
-  if (!password) {
-    return res.json({
-      message: ValidationErrors.PASSWORD_IS_REQUIRED,
-    });
-  }
-  if (!phone) {
-    return res.json({
-      message: ValidationErrors.PHONE_IS_REQUIRED,
-    });
-  }
-
   try {
-    const foundUser = await findOneUser(email);
+    const foundUser = await userService.findOneUserByEmail(email);
 
     if (foundUser) {
-      return res.json({
-        message: ErrorMessages.EMAIL_EXISTS_ALREADY,
+      return res.status(422).json({
+        status: 'error',
+        payload: ErrorMessages.EMAIL_EXISTS_ALREADY,
       });
     }
 
     const encryptedPassword = bcrypt.hashSync(password as string, 10);
-    await insertOneUser({ email, password: encryptedPassword, phone });
+    await userService.insertOneUser({ email, password: encryptedPassword, phone });
 
-    res.statusCode = 201;
-    return res.json({
+    return res.status(201).json({
       message: SuccessMessages.REGISTERED_SUCCESSFULLY,
     });
   } catch (e) {
-    console.log((e as Error).message);
     return next(e);
   }
 };
+
+export default { login, register };

@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { login, register } from '../controllers';
+import { authController } from '../controllers';
+import { checkLogin, checkRegister } from '../validators';
 
 const authRoutes = Router();
 
-authRoutes.post('/login', login);
-authRoutes.post('/register', register);
+authRoutes.post('/login', checkLogin(), authController.login);
+authRoutes.post('/register', checkRegister(), authController.register);
 
 export default authRoutes;

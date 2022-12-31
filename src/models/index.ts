@@ -1,3 +1,3 @@
-export * from './ErrorMessages.model';
-export * from './SuccessMessages.model';
+export * from './pet.model';
+export * from './report.model';
 export * from './user.model';
