@@ -2,7 +2,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import { errorHandler } from './middlewares';
-import { authRoutes } from './routes';
+import { authRoutes, reportRoutes } from './routes';
 
 dotenv.config();
 
@@ -22,6 +22,7 @@ app.get('/test', (_, res) => {
 });
 
 app.use('/', authRoutes);
+app.use('/report', reportRoutes);
 
 app.use(errorHandler);
 

@@ -9,6 +9,8 @@ export const errorHandler = (error: IError, _: Request, res: Response, next: Nex
     return next(error);
   }
 
+  console.log('Error Handler:', error);
+
   return res.json({
     error: error.message,
   });
