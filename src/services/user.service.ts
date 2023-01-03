@@ -39,7 +39,6 @@ const insertOneUser = async (user: Partial<IUser>) => {
     },
   };
   const response = await axios(config);
-  console.log(response);
   return response.data.document;
 };
 

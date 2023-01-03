@@ -7,8 +7,6 @@ export const errorHandler = (error: HttpError, req: Request, res: Response, next
     return next(error);
   }
 
-  console.log('Error Handler:', error);
-
   if (error.code === 422) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
