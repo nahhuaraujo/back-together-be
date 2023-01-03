@@ -1,51 +1,63 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import axios, { AxiosRequestConfig } from 'axios';
 import { Collections } from '../enums';
 import { IReport } from '../models';
 
 const findOne = async (id = '') => {
-  const url = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@backtogether.tjh2tas.mongodb.net/?retryWrites=true&w=majority`;
-  const client = new MongoClient(url);
-  try {
-    await client.connect();
-    const db = client.db(process.env.MONGO_DB_NAME);
-    const reports = db.collection(Collections.REPORTS);
-    return await reports.findOne({ _id: new ObjectId(id) });
-  } catch (e) {
-    throw new Error((e as Error).message);
-  } finally {
-    client.close();
-  }
+  const config: AxiosRequestConfig = {
+    url: `${process.env.MONGODB_DATA_API_URL}/findOne`,
+    method: 'post',
+    headers: {
+      'api-key': process.env.MONGODB_DATA_API_KEY,
+    },
+    data: {
+      dataSource: process.env.MONGODB_DATASOURCE,
+      database: process.env.MONGODB_NAME,
+      collection: Collections.REPORTS,
+      filter: {
+        _id: { $oid: id },
+      },
+    },
+  };
+  const response = await axios(config);
+  return response.data.document;
 };
 
 const insertOne = async (report: IReport) => {
-  const url = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@backtogether.tjh2tas.mongodb.net/?retryWrites=true&w=majority`;
-  const client = new MongoClient(url);
-  try {
-    report.user._id = new ObjectId(report.user._id);
-    await client.connect();
-    const db = client.db(process.env.MONGO_DB_NAME);
-    const reports = db.collection(Collections.REPORTS);
-    await reports.insertOne(report);
-  } catch (e) {
-    throw new Error((e as Error).message);
-  } finally {
-    client.close();
-  }
+  const config: AxiosRequestConfig = {
+    url: `${process.env.MONGODB_DATA_API_URL}/insertOne`,
+    method: 'post',
+    headers: {
+      'api-key': process.env.MONGODB_DATA_API_KEY,
+    },
+    data: {
+      dataSource: process.env.MONGODB_DATASOURCE,
+      database: process.env.MONGODB_NAME,
+      collection: Collections.REPORTS,
+      document: {
+        ...report,
+      },
+    },
+  };
+  const response = await axios(config);
+  return response.data;
 };
 
 const findAll = async () => {
-  const url = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@backtogether.tjh2tas.mongodb.net/?retryWrites=true&w=majority`;
-  const client = new MongoClient(url);
-  try {
-    await client.connect();
-    const db = client.db(process.env.MONGO_DB_NAME);
-    const reports = db.collection(Collections.REPORTS);
-    return await reports.find().toArray();
-  } catch (e) {
-    throw new Error((e as Error).message);
-  } finally {
-    client.close();
-  }
+  const config: AxiosRequestConfig = {
+    url: `${process.env.MONGODB_DATA_API_URL}/find`,
+    method: 'post',
+    headers: {
+      'api-key': process.env.MONGODB_DATA_API_KEY,
+    },
+    data: {
+      dataSource: process.env.MONGODB_DATASOURCE,
+      database: process.env.MONGODB_NAME,
+      collection: Collections.REPORTS,
+      filter: {},
+    },
+  };
+  const response = await axios(config);
+  return response.data.documents;
 };
 
 export default { findOne, insertOne, findAll };
