@@ -7,5 +7,5 @@ export enum ErrorMessages {
   AUTH_FAILED = 'La autenticacion fallo, intenta iniciar sesion nuevamente',
   SESSION_EXPIRED = 'La sesion expiro, inicia sesion nuevamente',
   UNKNOWN_ERROR = 'Ocurrio un error desconocido, por favor intenta mas tarde',
-  REPORT_NOT_FOUND = 'El reporte que esta buscando no fue encontrado, intente nuevamente',
+  REPORT_NOT_FOUND = 'El reporte que esta buscando con ese id no fue encontrado',
 }

@@ -1,64 +1,42 @@
 import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import { ErrorMessages, SuccessMessages } from '../enums';
-import { IReport } from '../models';
+import { HttpError, IReport } from '../models';
 import { reportService } from '../services';
 
-const createReport = async (req: Request, res: Response, next: NextFunction) => {
+const create = async (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const errorMsgs: string[] = [];
-    errors.array().forEach(error => {
-      errorMsgs.push(error.msg);
-    });
-    return res.status(422).json({
-      status: 'error',
-      payload: errorMsgs,
-    });
+    return next(new HttpError('Error de input', 422));
   }
-
   try {
     const report: IReport = req.body;
-    await reportService.insertOne({ ...report });
+    await reportService.insertOne(report);
     res.status(201).json({
-      status: 'success',
+      success: true,
       payload: SuccessMessages.REPORT_CREATED,
     });
   } catch (e) {
-    next(e);
+    next(new HttpError('No fue posible crear el reporte, intente nuevamente mas tarde', 500));
   }
 };
 
-const findReportById = async (req: Request, res: Response, next: NextFunction) => {
+const findById = async (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const errorMsgs: string[] = [];
-    errors.array().forEach(error => {
-      errorMsgs.push(error.msg);
-    });
-    return res.status(422).json({
-      status: 'error',
-      payload: errorMsgs,
-    });
+    return next(new HttpError('Error de input', 422));
   }
-
-  const id = req.body;
   try {
-    const foundReport = await reportService.findOne(id);
-    if (!foundReport)
-      return res.status(404).json({
-        success: 'error',
-        payload: ErrorMessages.REPORT_NOT_FOUND,
-      });
-
+    const report = await reportService.findOne(req.body.id);
+    if (!report) return next(new HttpError(ErrorMessages.REPORT_NOT_FOUND, 404));
     return res.json({
-      status: 'success',
+      success: true,
       payload: {
-        ...foundReport,
+        ...report,
       },
     });
   } catch (e) {
-    next(e);
+    next(new HttpError('Por el momento no es posible recuperar el reporte, intente nuevamente mas tarde'));
   }
 };
 
@@ -66,12 +44,12 @@ const findAll = async (_: Request, res: Response, next: NextFunction) => {
   try {
     const reports = await reportService.findAll();
     return res.json({
-      status: 'success',
+      success: true,
       payload: reports || [],
     });
   } catch (e) {
-    next(e);
+    next(new HttpError('Por el momento no es posible recuperar los reportes, intente nuevamente mas tarde', 500));
   }
 };
 
-export default { createReport, findReportById, findAll };
+export default { create, findById, findAll };
