@@ -15,10 +15,10 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     const { email, password }: IUser = req.body;
 
     const userFound = await userService.findOneUserByEmail(email);
-    if (!userFound) return next(new HttpError(ErrorMessages.EMAIL_NOT_FOUND, 404));
+    if (!userFound) return next(new HttpError(ErrorMessages.EMAIL_NOT_FOUND, 401));
 
     const isPassOk = bcrypt.compareSync(password as string, userFound.password as string);
-    if (!isPassOk) return next(new HttpError(ErrorMessages.EMAIL_NOT_REGISTERED, 404));
+    if (!isPassOk) return next(new HttpError(ErrorMessages.EMAIL_NOT_REGISTERED, 401));
 
     delete userFound.password;
 

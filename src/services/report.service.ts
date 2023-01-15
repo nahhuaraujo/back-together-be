@@ -22,7 +22,7 @@ const findOne = async (id = '') => {
   return response.data.document;
 };
 
-const insertOne = async (report: IReport) => {
+const insertOne = async (report: Partial<IReport>) => {
   const config: AxiosRequestConfig = {
     url: `${process.env.MONGODB_DATA_API_URL}/insertOne`,
     method: 'post',
