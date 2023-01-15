@@ -14,14 +14,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
   const img: UploadedFile = req.files?.img as UploadedFile;
 
-  img.mv(`${process.cwd()}/img/pets/${new Date() + img.name}`, error => {
-    if (error) {
-      return console.log((error as Error).message);
-    }
-    console.log('Success');
-  });
+  const newImgName = `${new Date().getTime() + '-' + img.name}`;
 
-  console.log('FormData Img:', req.body.img);
+  img.mv(`${process.cwd()}/img/pets/${newImgName}`, error => {
+    if (error) {
+      return next(new HttpError('La foto no pudo ser cargada', 500));
+    }
+  });
 
   try {
     const report: Partial<IReport> = {
@@ -31,7 +30,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         breed: req.body.breed,
         sex: req.body.sex,
         description: req.body.description,
-        img: req.body.img,
+        img: newImgName,
       },
       user: {
         _id: new ObjectId(req.body._id),
@@ -43,11 +42,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       reward: req.body.reward,
     };
 
-    // await reportService.insertOne(report);
-    // res.status(201).json({
-    //   success: true,
-    //   payload: SuccessMessages.REPORT_CREATED,
-    // });
+    await reportService.insertOne(report);
+    res.status(201).json({
+      success: true,
+      payload: SuccessMessages.REPORT_CREATED,
+    });
   } catch (e) {
     next(new HttpError('No fue posible crear el reporte, intente nuevamente mas tarde', 500));
   }
