@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import { HttpError } from '../models';
-import { ErrorMessages } from '../enums';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { ErrorMessages } from '../enums';
+import { HttpError } from '../models';
 
 export const authHandler = (req: Request, _: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
@@ -13,6 +13,7 @@ export const authHandler = (req: Request, _: Response, next: NextFunction) => {
   try {
     const token = authHeader.split(' ')[1];
     jwt.verify(token, process.env.TOKEN_SECRET as string);
+    next();
   } catch (e) {
     return next(new HttpError(ErrorMessages.SESSION_EXPIRED, 401));
   }
