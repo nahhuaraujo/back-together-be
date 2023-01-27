@@ -1,10 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
-import { HttpError } from '../models';
 import { validationResult } from 'express-validator';
+import { HttpError } from '../models';
 
 export const errorHandler = (error: HttpError, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     return next(error);
+  }
+
+  if (error.code === 401) {
+    return res.json({
+      success: false,
+      payload: error.message,
+    });
   }
 
   if (error.code === 422) {
