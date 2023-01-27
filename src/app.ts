@@ -22,7 +22,7 @@ app.use('/api/img/pets', express.static('img/pets'));
 app.get('/api/test', (_, res) => {
   res.json({
     success: true,
-    payload: 'Server up and running!',
+    payload: 'Server up and running!!',
   });
 });
 
