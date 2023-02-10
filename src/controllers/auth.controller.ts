@@ -30,7 +30,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       },
     });
   } catch (e) {
-    return next(new HttpError('No es posible iniciar sesion por el momento, intente nuevamente mas tarde'));
+    return next(new HttpError('No es posible iniciar sesion por el momento, intente nuevamente mas tarde', 500));
   }
 };
 
@@ -52,7 +52,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
       message: SuccessMessages.REGISTERED_SUCCESSFULLY,
     });
   } catch (e) {
-    return next(new HttpError('No es posible registrarse por el momento, intente nuevamente mas tarde'));
+    return next(new HttpError('No es posible registrarse por el momento, intente nuevamente mas tarde', 500));
   }
 };
 
