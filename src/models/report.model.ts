@@ -7,5 +7,6 @@ export interface IReport {
   user: IUser;
   type: 'found' | 'lost';
   location: string;
+  createdAt: number;
   reward: boolean;
 }

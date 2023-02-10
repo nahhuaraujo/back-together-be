@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
+import { UploadedFile } from 'express-fileupload';
 import { validationResult } from 'express-validator';
+import { ObjectId } from 'mongodb';
 import { ErrorMessages, SuccessMessages } from '../enums';
 import { HttpError, IReport } from '../models';
 import { reportService } from '../services';
-import { ObjectId } from 'mongodb';
-import { UploadedFile } from 'express-fileupload';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
@@ -14,7 +14,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
   const img: UploadedFile = req.files?.img as UploadedFile;
 
-  const newImgName = `${new Date().getTime() + '-' + img.name}`;
+  const creationTimestamp = new Date().getTime();
+  const newImgName = `${creationTimestamp + '-' + img.name}`;
 
   img.mv(`${process.cwd()}/img/pets/${newImgName}`, error => {
     if (error) {
@@ -39,6 +40,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       },
       type: req.body.type,
       location: req.body.location,
+      createdAt: creationTimestamp,
       reward: req.body.reward,
     };
 
